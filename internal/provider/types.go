@@ -9,24 +9,25 @@ type Provider interface {
 }
 
 type VLESS struct {
-	Address     string
-	Port        int
-	ID          string
-	Flow        string
-	Encryption  string
-	Network     string
-	Security    string
-	HeaderType  string
-	Host        string
-	Path        string
-	SNI         string
-	ALPN        string
-	Service     string
-	Fingerprint string
-	PublicKey   string
-	ShortID     string
-	SpiderX     string
-	PQV         string
+	Address       string
+	Port          int
+	ID            string
+	Flow          string
+	Encryption    string
+	Network       string
+	Security      string
+	HeaderType    string
+	Host          string
+	Path          string
+	SNI           string
+	ALPN          string
+	AllowInsecure bool
+	Service       string
+	Fingerprint   string
+	PublicKey     string
+	ShortID       string
+	SpiderX       string
+	PQV           string
 }
 
 type VMess struct {

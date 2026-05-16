@@ -189,6 +189,42 @@ func TestVLESSOutbound_RealitySettingsPresent(t *testing.T) {
 	}
 }
 
+func TestFromURI_VLESS_XHTTPTLSAllowInsecure(t *testing.T) {
+	raw := "vless://80cbb58b-74c0-4fb5-a66e-818ffc81a3cd@45.61.138.31:4444?encryption=none&security=tls&sni=uk0.somerandomdomain.xyz&type=xhttp&host=uk0.somerandomdomain.xyz&path=%2Fvpn&allowInsecure=1"
+
+	p, err := FromURI(raw)
+	if err != nil {
+		t.Fatalf("FromURI() error = %v", err)
+	}
+	v, ok := p.(*VLESS)
+	if !ok {
+		t.Fatalf("provider type = %T, want *VLESS", p)
+	}
+	if !v.AllowInsecure {
+		t.Fatal("v.AllowInsecure = false, want true")
+	}
+
+	out, err := v.Outbound()
+	if err != nil {
+		t.Fatalf("Outbound() error = %v", err)
+	}
+	stream := mustMap(t, out["streamSettings"])
+	xhttp := mustMap(t, stream["xhttpSettings"])
+	if got := xhttp["host"]; got != "uk0.somerandomdomain.xyz" {
+		t.Fatalf("xhttp.host = %#v, want uk0.somerandomdomain.xyz", got)
+	}
+	if got := xhttp["path"]; got != "/vpn" {
+		t.Fatalf("xhttp.path = %#v, want /vpn", got)
+	}
+	tls := mustMap(t, stream["tlsSettings"])
+	if got := tls["serverName"]; got != "uk0.somerandomdomain.xyz" {
+		t.Fatalf("tls.serverName = %#v, want uk0.somerandomdomain.xyz", got)
+	}
+	if got := tls["allowInsecure"]; got != true {
+		t.Fatalf("tls.allowInsecure = %#v, want true", got)
+	}
+}
+
 func TestFromURI_VLESS_Minimal(t *testing.T) {
 	raw := "vless://80cbb58b-74c0-4fb5-a66e-818ffc81a3cd@example.com:443"
 	p, err := FromURI(raw)

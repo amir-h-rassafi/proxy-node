@@ -33,25 +33,24 @@ func (p *vlessParser) Parse(u *url.URL, _ string) (Provider, error) {
 
 	q := u.Query()
 	return &VLESS{
-		Address:       host,
-		Port:          port,
-		ID:            id,
-		Flow:          q.Get("flow"),
-		Encryption:    valueOrDefault(q.Get("encryption"), "none"),
-		Network:       valueOrDefault(q.Get("type"), "tcp"),
-		Security:      valueOrDefault(q.Get("security"), "none"),
-		HeaderType:    q.Get("headerType"),
-		Host:          q.Get("host"),
-		Path:          q.Get("path"),
-		SNI:           q.Get("sni"),
-		ALPN:          q.Get("alpn"),
-		AllowInsecure: parseBoolish(q.Get("allowInsecure")),
-		Service:       q.Get("serviceName"),
-		Fingerprint:   q.Get("fp"),
-		PublicKey:     q.Get("pbk"),
-		ShortID:       q.Get("sid"),
-		SpiderX:       q.Get("spx"),
-		PQV:           q.Get("pqv"),
+		Address:     host,
+		Port:        port,
+		ID:          id,
+		Flow:        q.Get("flow"),
+		Encryption:  valueOrDefault(q.Get("encryption"), "none"),
+		Network:     valueOrDefault(q.Get("type"), "tcp"),
+		Security:    valueOrDefault(q.Get("security"), "none"),
+		HeaderType:  q.Get("headerType"),
+		Host:        q.Get("host"),
+		Path:        q.Get("path"),
+		SNI:         q.Get("sni"),
+		ALPN:        q.Get("alpn"),
+		Service:     q.Get("serviceName"),
+		Fingerprint: q.Get("fp"),
+		PublicKey:   q.Get("pbk"),
+		ShortID:     q.Get("sid"),
+		SpiderX:     q.Get("spx"),
+		PQV:         q.Get("pqv"),
 	}, nil
 }
 
@@ -104,22 +103,11 @@ func (v *VLESS) Outbound() (map[string]any, error) {
 	if strings.EqualFold(v.Network, "grpc") {
 		stream["grpcSettings"] = map[string]any{"serviceName": v.Service}
 	}
-	if strings.EqualFold(v.Network, "xhttp") {
-		xhttp := map[string]any{"path": valueOrDefault(v.Path, "/")}
-		if strings.TrimSpace(v.Host) != "" {
-			xhttp["host"] = v.Host
-		}
-		stream["xhttpSettings"] = xhttp
-	}
 	if strings.EqualFold(v.Security, "tls") {
-		tls := map[string]any{
+		stream["tlsSettings"] = map[string]any{
 			"serverName": firstNonEmpty(v.SNI, v.Host, v.Address),
 			"alpn":       splitCSV(v.ALPN),
 		}
-		if v.AllowInsecure {
-			tls["allowInsecure"] = true
-		}
-		stream["tlsSettings"] = tls
 	}
 	if strings.EqualFold(v.Security, "reality") {
 		reality := map[string]any{
